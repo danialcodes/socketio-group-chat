@@ -1,10 +1,11 @@
 const app = require("express")();
+require('dotenv').config()
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 
 const expressServer = createServer(app);
 const io = new Server(expressServer);
-
+const port = process.env.PORT ||5000 ;
 const allmsg = [];
 io.on("connection", (socket) => {
     console.log(allmsg);
