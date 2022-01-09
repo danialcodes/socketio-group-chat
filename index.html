@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <h1 class="text-3xl font-bold text-center">Welcome
+        <span id="name"></span>
+    </h1>
+
+    <div class="flex flex-row h-screen mb-5">
+        <div class="basis-1/2 md:basis-2/5 bg-green-500">
+            <div class="flex flex-col md:w-1/2 mx-auto my-60">
+                <label class="relative block">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-2">
+                        <img class="h-5 w-5 fill-gray-300"
+                            src="https://img.icons8.com/external-those-icons-lineal-those-icons/24/000000/external-message-love-those-icons-lineal-those-icons-2.png" />
+                    </span>
+                    <input
+                        class="placeholder:italic placeholder:text-gray-400 block bg-white w-full border border-gray-300 rounded-md py-2 pl-9 pr-3 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+                        placeholder="Write your message..." type="text" id="msg" />
+                </label>
+
+                <button onclick="sendmsg()"
+                    class="bg-violet-500 hover:bg-violet-400 active:bg-violet-600 focus:outline-none focus:ring focus:ring-violet-300 md:w-1/2 m-auto rounded mt-5 p-2">
+                    Send Message
+                </button>
+            </div>
+        </div>
+
+        <div class="basis-1/2 md:basis-3/5 bg-cyan-500 overflow-auto">
+
+
+
+            <div class="p-3">
+                <div class=" mx-auto space-y-5 grid grid-cols-1" id="msgbox">
+
+
+                    <!-- <div class="place-self-start text-left">
+                        <div class="bg-white p-2 rounded-2xl rounded-tl-none">
+                            Hey, there! It's been a while!
+                        </div>
+                    </div> -->
+
+
+
+
+
+                    <!-- <div class="place-self-end text-right">
+                        <div class="bg-violet-300  md:bg-violet-400 text-stone-800 p-2 rounded-2xl rounded-tr-none">
+                            Oops! Sorry for the late response!
+                        </div>
+                    </div> -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const msgbox = document.querySelector("#msgbox");
+        const namebox = document.querySelector("#name");
+        let name;
+        while (!name) {
+            name = prompt("Please Enter Your Name to join the chat:");
+        }
+        namebox.innerText = name;
+
+        const msgFromOthers = (msg) => {
+            const div = document.createElement('div');
+            div.classList.add("place-self-start", "text-left");
+            div.innerHTML = `
+                <div class="bg-white p-2 rounded-2xl rounded-tl-none">
+                    <div class="relative flex flex-col items-center group">
+                        ${msg[1]}
+                        <div class="absolute bottom-0 flex flex-col items-center hidden mb-6 group-hover:flex">
+                            <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">${msg[0]}
+                            </span>
+                            <div class="w-3 h-3 -mt-2 rotate-45 bg-black">
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            msgbox.append(div);
+
+        }
+        const msgFromOwn = (msg) => {
+            const div = document.createElement('div');
+            div.classList.add("place-self-end", "text-right");
+            div.innerHTML = `
+                <div class="bg-violet-300  md:bg-violet-400 text-stone-800 p-2 rounded-2xl rounded-tr-none">
+                    
+                    <div class="relative flex flex-col items-center group">
+                        ${msg[1]}
+                        <div class="absolute bottom-0 flex flex-col items-center hidden mb-6 group-hover:flex">
+                            <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">
+                            ${msg[0]}
+                            </span>
+                            <div class="w-3 h-3 -mt-2 rotate-45 bg-black">
+                            </div>
+                        </div>
+                    </div>
+                        
+                </div>`;
+            msgbox.append(div);
+
+        }
+
+
+
+
+        const socket = io();
+
+        socket.on("message", (allmsg) => {
+            allmsg.map(msg => {
+                if (msg[0] != name) {
+                    msgFromOthers(msg)
+                }
+                else {
+                    msgFromOwn(msg);
+                }
+            });
+
+        })
+
+        socket.on("newmsg", (newmsg) => {
+
+            if (newmsg[0] != name) {
+                msgFromOthers(newmsg);
+            }
+            else {
+                msgFromOwn(newmsg);
+            }
+
+        })
+
+        const sendmsg = () => {
+            const msg = document.querySelector("#msg");
+            if (msg.value) {
+                socket.emit("newmsg", [name, msg.value]);
+                msg.value = "";
+            }
+
+
+        }
+    </script>
+
+</body>
+
+</html>
