@@ -54,6 +54,6 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
 })
 
-expressServer.listen(5000, () => {
-    console.log("Connected to port 5000");
+expressServer.listen(2000, () => {
+    console.log("Connected to port 2000");
 });
